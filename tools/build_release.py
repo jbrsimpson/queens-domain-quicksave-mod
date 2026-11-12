@@ -89,7 +89,7 @@ def readme_txt(version, bundled):
         "F5 = quicksave (in game, after your first save at a monolith)",
         "F9 twice = load the quicksave (in game or on the death screen)",
         "",
-        "Project page: https://github.com/derlocke-ng/queens-maiden-save-mod",
+        "Project page: https://github.com/jbrsimpson/queens-domain-quicksave-mod (fork of derlocke-ng/queens-maiden-save-mod)",
         "QDQuickSave is MIT licensed (QDQuickSave-LICENSE.txt).",
     ]
     if bundled:

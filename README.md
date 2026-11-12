@@ -1,6 +1,15 @@
 # QDQuickSave – Quicksave & Quickload for Queens Domain
 
-[![CI](https://github.com/derlocke-ng/queens-maiden-save-mod/actions/workflows/ci.yml/badge.svg)](https://github.com/derlocke-ng/queens-maiden-save-mod/actions/workflows/ci.yml)
+[![CI](https://github.com/jbrsimpson/queens-domain-quicksave-mod/actions/workflows/ci.yml/badge.svg)](https://github.com/jbrsimpson/queens-domain-quicksave-mod/actions/workflows/ci.yml)
+
+> **Maintained fork.** This is a fork of [derlocke-ng/queens-maiden-save-mod](https://github.com/derlocke-ng/queens-maiden-save-mod)
+> by derlocke-ng, who wrote the mod and has since archived the original repository. This fork keeps it working with
+> new game versions.
+>
+> **Current version: 1.0.4, for Queens Domain 1.01.06 (build 13565)**, the 12 November 2026 update. Versions 1.0.3
+> and older were made for 1.01.00 (build 13464) and stop working on 1.01.06: they refuse F5 with *"save at a Crystal
+> Monument in this slot first"*. To check your game version, see the Steam patch notes, or open `version.txt` in the
+> game folder (it shows the build number, e.g. `13565`).
 
 Press **F5** to quicksave anywhere, press **F9 twice** to jump back to it, even from the death screen.
 
@@ -15,8 +24,8 @@ saves are never touched.**
 
 ## Quick start (Windows)
 
-1. Download **[QDQuickSave-with-UE4SS.zip](https://github.com/derlocke-ng/queens-maiden-save-mod/releases/latest/download/QDQuickSave-with-UE4SS.zip)**
-   (always the newest version; all versions are on the [Releases](https://github.com/derlocke-ng/queens-maiden-save-mod/releases) page).
+1. Download **[QDQuickSave-with-UE4SS.zip](https://github.com/jbrsimpson/queens-domain-quicksave-mod/releases/latest/download/QDQuickSave-with-UE4SS.zip)**
+   (always the newest version; all versions are on the [Releases](https://github.com/jbrsimpson/queens-domain-quicksave-mod/releases) page).
 2. Open the game folder: in Steam, right-click *Queens Domain* → **Manage** → **Browse local files**.
    It is the folder that contains `QueensDomain.exe`.
 3. Extract the zip **into that folder** (keep the folder structure). Done – start the game.
@@ -105,9 +114,8 @@ Download **`QDQuickSave-<version>.zip`** (mod only) and extract it into the game
 
 ## Tested with
 
-- Queens Domain **1.01.00** (build 13464, Unreal Engine 4.27.2)
+- Queens Domain **1.01.06** (build 13565, 12 Nov 2026 update; v1.0.4 adapts to its new GetSaveSlotName signature, tested on Windows)
 - UE4SS experimental build **e84db30c** (the one included in the `-with-UE4SS` zip)
-- Linux (Fedora Silverblue) with Bottles. Windows itself has not been tested yet – reports welcome.
 
 ## For developers
 
@@ -123,6 +131,8 @@ then builds both zips, creates the tag `v1.0.1` and publishes the GitHub Release
 
 ## Credits & licence
 
+- QDQuickSave was created by [derlocke-ng](https://github.com/derlocke-ng) ([original repository](https://github.com/derlocke-ng/queens-maiden-save-mod),
+  archived). Version 1.0.4 and later are maintained in this fork.
 - QDQuickSave is released under the [MIT licence](LICENSE).
 - [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS) – the mod loader (MIT licence, included in the bundle as `ue4ss/LICENSE`).
 - Queens Domain by Freshly Baked Games. This project contains no game files.

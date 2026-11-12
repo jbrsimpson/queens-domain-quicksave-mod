@@ -162,17 +162,52 @@ local function activeSlotIndex(gi)
 end
 
 -- Windows path of World<N>_Suspend_<k>.sav, from the game's own BlueprintUtils:GetSaveSlotName.
+-- Its parameters: build 13464 (SlotIndex, bForceDemoName, bBackup, bSuspend, SuspendIndex); build 13565 added
+-- BackupIndex (numbered World<N>_backup_<i>.sav files), and calling with the old argument count fails. Each known
+-- argument list is tried until one returns the expected file name; the one that works is remembered.
+local SLOT_NAME_CALLS = {
+    function(u, slot, k) return u:GetSaveSlotName(slot, false, false, true, k, 0) end,   -- 13565: ..., SuspendIndex, BackupIndex
+    function(u, slot, k) return u:GetSaveSlotName(slot, false, false, true, 0, k) end,   -- in case BackupIndex comes first
+    function(u, slot, k) return u:GetSaveSlotName(slot, false, false, true, k) end,      -- 13464
+}
+local slotNameCall = nil
+local slotNameErrorsLogged = false
+
 local function suspendPath(slot, k)
     local utils = StaticFindObject("/Script/QueensDomain.Default__BlueprintUtils")
-    if utils == nil or not utils:IsValid() then return nil end
-    local name = str(safe(function() return utils:GetSaveSlotName(slot, false, false, true, k) end))
-    if not name then return nil end
-    local path = name:gsub("^FULLPATH:", "")
-    if not path:match("World" .. slot .. "_Suspend_" .. k .. "%.sav$") then
-        log("unexpected suspend slot name: " .. name)
+    if utils == nil or not utils:IsValid() then
+        log("BlueprintUtils not found")
         return nil
     end
-    return path
+    local expected = "World" .. slot .. "_Suspend_" .. k .. "%.sav$"
+    local function try(call)
+        local ok, res = pcall(call, utils, slot, k)
+        if not ok then return nil, "error: " .. tostring(res) end
+        local name = str(res)
+        if not name then return nil, "returned no string" end
+        local path = name:gsub("^FULLPATH:", "")
+        if not path:match(expected) then return nil, "unexpected name " .. name end
+        return path
+    end
+    if slotNameCall then
+        local path = try(slotNameCall)
+        if path then return path end
+    end
+    local reasons = {}
+    for i, call in ipairs(SLOT_NAME_CALLS) do
+        local path, why = try(call)
+        if path then
+            if slotNameCall ~= call then log("GetSaveSlotName: using argument list #" .. i) end
+            slotNameCall = call
+            return path
+        end
+        reasons[#reasons + 1] = "#" .. i .. " " .. why
+    end
+    if not slotNameErrorsLogged then
+        slotNameErrorsLogged = true
+        log("GetSaveSlotName failed for slot " .. slot .. ", index " .. k .. ": " .. table.concat(reasons, "; "))
+    end
+    return nil
 end
 
 local function siblingPath(slot, fileName)
@@ -187,7 +222,12 @@ local function quickSavePath(slot) return siblingPath(slot, "QuickSave_World" ..
 -- (test T9), so quicksaving and quickloading require a regular (monolith) save in the slot.
 local function hasWorldSave(slot)
     local p = siblingPath(slot, "World" .. slot .. ".sav")
-    return p ~= nil and isGvas(readFile(p))
+    if p == nil then return false end
+    if not isGvas(readFile(p)) then
+        log("no readable save at " .. p)
+        return false
+    end
+    return true
 end
 
 -- Returns the quicksave bytes for slot, or nil and a short reason.
