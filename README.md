@@ -6,7 +6,7 @@
 > by derlocke-ng, who wrote the mod and has since archived the original repository. This fork keeps it working with
 > new game versions.
 >
-> **Current version: 1.0.4, for Queens Domain 1.01.06 (build 13565)**, the 12 November 2026 update. Versions 1.0.3
+> **Current version: 1.0.5, for Queens Domain 1.01.06 (build 13565)**, the 12 November 2026 update. Versions 1.0.3
 > and older were made for 1.01.00 (build 13464) and stop working on 1.01.06: they refuse F5 with *"save at a Crystal
 > Monument in this slot first"*. To check your game version, see the Steam patch notes, or open `version.txt` in the
 > game folder (it shows the build number, e.g. `13565`).
@@ -116,6 +116,7 @@ Download **`QDQuickSave-<version>.zip`** (mod only) and extract it into the game
 
 - Queens Domain **1.01.06** (build 13565, 12 Nov 2026 update; v1.0.4 adapts to its new GetSaveSlotName signature, tested on Windows)
 - UE4SS experimental build **e84db30c** (the one included in the `-with-UE4SS` zip)
+- Windows and **Steam Deck** (Proton, with the launch option from the Linux / Steam Deck quick start above)
 
 ## For developers
 

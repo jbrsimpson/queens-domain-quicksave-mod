@@ -400,6 +400,39 @@ end
 local saving = false
 local requestCounter = 0
 
+-- The game's own suspend-save block counter, FS_GameInstance_C.SuspendIsBlocked. Places such as boss arenas add to
+-- it on entry and subtract on exit, but the game instance lives until the game is closed, so dying or quitting inside
+-- such a place leaves the counter off for the rest of the session (seen: 0, -1, -3 on 1.01.00; stuck positive after a
+-- boss arena on 1.01.06, which refused F5 everywhere until a restart). A load never places the player in a blocked
+-- area, so the value shortly after each load is the "not blocked" level; only a value above it means blocked. A lower
+-- value seen later is also not blocked and becomes the new level.
+local blockBaseline = 0
+
+local function readBlockCounter(gi)
+    local v = safe(function() return gi.SuspendIsBlocked end)
+    if type(v) == "number" then return v end
+    return nil
+end
+
+local function rebaseBlockCounter()
+    local gi = getGameInstance()
+    local v = gi and readBlockCounter(gi)
+    if v == nil then return end
+    if v ~= blockBaseline then log(string.format("SuspendIsBlocked is %d after loading (was %d)", v, blockBaseline)) end
+    blockBaseline = v
+end
+
+local function isSaveBlocked(gi)
+    local v = readBlockCounter(gi)
+    if v == nil then return false end
+    if v < blockBaseline then blockBaseline = v end
+    if v > blockBaseline then
+        log(string.format("SuspendIsBlocked=%d, unblocked level %d", v, blockBaseline))
+        return true
+    end
+    return false
+end
+
 -- Returns gi, slot on success; nil, short reason when quicksaving is not supported right now.
 local function checkCanQuickSave()
     local gi = getGameInstance()
@@ -414,9 +447,7 @@ local function checkCanQuickSave()
     if isPaused(pawn) then return nil, "close the menu first" end
     local busy = busyReason(pawn)
     if busy then return nil, busy end
-    -- The game's own block counter. Observed values: 0, -1, -3; only positive values are treated as blocked.
-    local blocked = safe(function() return gi.SuspendIsBlocked end) or 0
-    if blocked > 0 then return nil, "the game blocks saving here" end
+    if isSaveBlocked(gi) then return nil, "the game blocks saving here" end
     if safe(function() return gi.SuspendSaveCurrentlyWriting end) == true then return nil, "game is saving, try again" end
     if saving then return nil, "quicksave already in progress" end
     local slot = activeSlotIndex(gi)
@@ -448,8 +479,9 @@ local function finishQuickSave(id, slot, before, waited)
         if not src then
             if waited >= SAVE_TIMEOUT_MS then
                 saving = false
-                log(string.format("QUICKSAVE #%d FAILED: no suspend file of slot %d changed within %d s",
-                    id, slot, SAVE_TIMEOUT_MS // 1000))
+                log(string.format("QUICKSAVE #%d FAILED: no suspend file of slot %d changed within %d s"
+                    .. " (SuspendIsBlocked=%s, unblocked level %d)", id, slot, SAVE_TIMEOUT_MS // 1000,
+                    tostring(gi and readBlockCounter(gi)), blockBaseline))
                 showMessage("Quicksave failed")
                 return
             end
@@ -524,6 +556,7 @@ end
 
 -- FS_PlayerChar_C:RestoreSuspend runs once the game has placed the player at the suspend position (traces v6).
 local function onRestoreSuspend(self)
+    ExecuteWithDelay(2000, function() ExecuteInGameThread(rebaseBlockCounter) end)
     local slot = pendingLoadedSlot
     if slot == nil then return end
     local gi = getGameInstance()
@@ -537,6 +570,8 @@ end
 -- FS_PlayerChar_C:RestoreToSavePoint runs when any load (game's or ours) has finished. After a death, pop the duck once
 -- more: a quickload in the first second of the death animation runs before the game pushes it.
 local function onRestoreToSavePoint(self)
+    -- Let the load settle, then take the block counter's value as the "not blocked" level (see isSaveBlocked).
+    ExecuteWithDelay(2000, function() ExecuteInGameThread(rebaseBlockCounter) end)
     local diedBefore = dyingPawnAddr ~= nil
     dyingPawnAddr = nil   -- a new pawn may reuse the old one's address
     local gi = getGameInstance()
