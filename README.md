@@ -114,9 +114,9 @@ Download **`QDQuickSave-<version>.zip`** (mod only) and extract it into the game
 
 ## Tested with
 
-- Queens Domain **1.01.06** (build 13565, 12 Nov 2026 update; v1.0.4 adapts to its new GetSaveSlotName signature, tested on Windows)
+- QDQuickSave **1.0.5** on Queens Domain **1.01.06** (build 13565, the 12 Nov 2026 update)
+- **Windows** and **Steam Deck** (Proton, with the launch option from the Linux / Steam Deck quick start above)
 - UE4SS experimental build **e84db30c** (the one included in the `-with-UE4SS` zip)
-- Windows and **Steam Deck** (Proton, with the launch option from the Linux / Steam Deck quick start above)
 
 ## For developers
 
